@@ -160,9 +160,9 @@ def get_game_events():
                     "time": utils.format_time(goal["time"]),
                     "is_powerplay": properties["isPowerplay"],
                     "is_shorthanded": properties["isEmptyNet"],
-                    "is_ig": properties["isInsuranceGoal"],
-                    "is_gwg": properties["isGameWinningGoal"],
-                    "is_ps": properties["isPenaltyShot"],
+                    "is_insurancegoal": properties["isInsuranceGoal"],
+                    "is_gamewinninggoal": properties["isGameWinningGoal"],
+                    "is_penaltyshot": properties["isPenaltyShot"],
                     "x_location": goal["xLocation"],
                     "y_location": goal["yLocation"]
                 })
