@@ -99,9 +99,17 @@ def get_game_events():
         game = return_json(url)
 
         # init shootout_counter at 1 so when the first shot is taken, it will be 1 and not 0 - purely personal preference bc i know programming languages start at 0 so i could follow that standard
+        # just makes it more readable if i ever get around to sharing my data
         shootout_counter = 1
 
         for event in game:
+            # general structure for this is:
+                # 1. figure out what the event type is
+                # 2. get the details for the event
+                # 3. do any additional logic, such as goalie_change
+                # 4. write it to a structured dict with each field in the database table
+                # 5. repeat until all events are parsed
+
             if event["event"] == "goalie_change":
                 goalie_change = event["details"]
                 # json labels are slightly different depending on if a goalie is entering or exiting so i have to get those two first
@@ -167,6 +175,7 @@ def get_game_events():
                     "y_location": goal["yLocation"]
                 })
 
+                # this ties back to the powerplay thing - i wanted primary/secondary to be 1/2 for ease of reading, so therefore index+1
                 for index, assist in enumerate(goal["assists"]):
                     events["assists"].append({
                         "goal_id": goal["game_goal_id"],
