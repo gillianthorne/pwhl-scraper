@@ -4,6 +4,7 @@ import datetime
 import math
 import config
 import utils
+import read_db as rd
 
 def return_json(url):
     # since this is literally just json, no need for beautifulsoup. just requests.get and go
@@ -40,41 +41,85 @@ def get_players():
     return players
 
 def get_games():
-    # set up empty list for us to put our data in
-    games = []
+    # set up empty dict for us to put our data in
+    games = {}
 
-    url = f"https://lscluster.hockeytech.com/feed/index.php?feed=statviewfeed&view=schedule&team=-1&season={config.SEASON}&month=-1&location=homeaway&key=694cfeed58c932ee&client_code=pwhl&site_id=2&league_id=1&division_id=-1&lang=en"
+    try:
+        url = f"https://lscluster.hockeytech.com/feed/index.php?feed=statviewfeed&view=schedule&team=-1&season={config.SEASON}&month=-1&location=homeaway&key=694cfeed58c932ee&client_code=pwhl&site_id=2&league_id=1&division_id=-1&lang=en"
 
-    game_list = return_json(url)
+        game_list = return_json(url)
 
-    # if you look at what was returned, we want the data specifically in [sections][0][data]
-    for game in game_list["sections"][0]["data"]:
-        # format the date properly
-        date_str = game["row"]["date_with_data"]
-        datetime_str = datetime.datetime.strptime(date_str, "%a, %b %d")
+        # we'll need venue data later
+        venues = rd.get_venues()
 
-        # formate the game status properly
-        game_status = game["row"]["game_status"].split()
+        # if you look at what was returned, we want the data specifically in [sections][0][data]
+        for game in game_list[0]["sections"][0]["data"]:
+            # format the date properly
+            # date_str = game["row"]["date_with_day"]
 
-        # game statuses are "Final", "Final OT", "Final SO" etc so we want either "OT"/"SO" or "REG" if neither is there
-        game_status = game_status[-1] if len(game_status) > 1 else "REG"
+            # formate the game status properly
+            game_status = game["row"]["game_status"].split()
 
-        games.append({
-            "game_id": game["row"]["game_id"],
-            "date": datetime_str,
-            "home_team": game["prop"]["home_team_city"]["teamLink"],
-            "visiting_team": game["prop"]["visiting_team_city"]["teamLink"],
-            "season": config.SEASON,
-            "venue": 0,
-            "attendance": 0,
-            "start_time": None,
-            "end_time": None,
-            "duration": None,
-            "home_goals": game["row"]["home_goal_count"],
-            "visiting_goals": game["row"]["visiting_goal_count"],
-            "game_status": game_status
-        })
+            # game statuses are "Final", "Final OT", "Final SO" etc so we want either "OT"/"SO" or "REG" if neither is there
+            game_status = game_status[-1] if len(game_status) > 1 else "REG"
 
+            games[game["row"]["game_id"]] = {
+                "game_id": game["row"]["game_id"],
+                # "date": utils.parse_date(date_str),
+                "home_team": game["prop"]["home_team_city"]["teamLink"],
+                "visiting_team": game["prop"]["visiting_team_city"]["teamLink"],
+                "season": config.SEASON,
+                "venue": 0,
+                "attendance": 0,
+                "start_time": None,
+                "end_time": None,
+                "duration": None,
+                "home_goals": game["row"]["home_goal_count"],
+                "visiting_goals": game["row"]["visiting_goal_count"],
+                "game_status": game_status
+            }
+    except TypeError as err:
+        print(f"Error: {err}")
+        print("This typically is a game not found error, which is expected if the game_id is not valid. This is normal behavior for the scraper.")
+
+    # we're using another page now for the rest of the data
+    for i in range(config.MIN_GAME, config.MAX_GAME + 1):
+        # initialize a blank dict, i like this more than creating a large one at the end
+        
+        try:
+            game_data = {}
+            url = f"https://lscluster.hockeytech.com/feed/index.php?feed=statviewfeed&view=gameSummary&game_id={i}&key=694cfeed58c932ee&site_id=2&client_code=pwhl&lang=en&league_id="        
+            game = return_json(url)["details"]
+
+            game_id = str(game["id"]).strip()
+
+            # check if start_time is am or pm
+            if game["startTime"][-6:-4] == "PM":
+                start_time = utils.parse_game_time(game["startTime"][:-7], "pm")
+            else:
+                start_time = utils.parse_game_time(game["startTime"][:-7], "am")
+
+
+            # check if end_time is am or pm
+            if game["endTime"][-6:-4] == "PM":
+                end_time = utils.parse_game_time(game["endTime"][:-7], "pm")
+            else:
+                end_time = utils.parse_game_time(game["endTime"][:-7], "am")
+
+            try:
+                games[game_id]["game_id"] = game["id"]
+                # games[game_id]["venue"] = venues[game["venue"].split("|")[0].strip()]
+                games[game_id]["attendance"] = game["attendance"]
+                games[game_id]["start_time"] = start_time
+                games[game_id]["end_time"] = end_time
+                games[game_id]["duration"] = utils.parse_duration(game["duration"])
+
+            # sometimes the pwhl skips games or orders them weirdly, this should account for that
+            except KeyError as err:
+                print(f"Error: Game {err} does not exist.")
+        # sometimes it'll try to get a game and mistake the error code for a game, this should account for that
+        except TypeError as err:
+            print(f"Error: Game {err} does not exist.")
     return games
 
 def get_game_events():
