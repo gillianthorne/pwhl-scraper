@@ -1,5 +1,6 @@
 from app.scrape_data import get_game_events, get_games, get_players
 import app.write_data as wd
+from app.utils import format_exception
 
 
 # same structure for all tables:
@@ -14,15 +15,22 @@ def players():
     except Exception as e:
         print("Couldn't write players")
         print(e)
+        print("stack trace:")
+        print(format_exception(e))
+        print("occurred on line {}".format(e.__traceback__.tb_lineno))
 
 # i want to update this one to merge the two game dicts i had into one so it isn't an insert-update situation
 def games():
     try:
         games_list = get_games()
-        wd.write_games(games_list)
+        print(games_list.values())
+        wd.write_games(games_list.values())
     except Exception as e:
         print("Couldn't write games")
         print(e)
+        print("stack trace:")
+        print(format_exception(e))
+        print("occurred on line {}".format(e.__traceback__.tb_lineno))
 
 def game_events():
     try:
@@ -41,6 +49,9 @@ def game_events():
     except Exception as e:
         print("Couldn't write game events")
         print(e)
+        print("stack trace:")
+        print(format_exception(e))
+        print("occurred on line {}".format(e.__traceback__.tb_lineno))
 
 if __name__ == "__main__":
     players()

@@ -1,4 +1,6 @@
 import datetime
+import sys
+import traceback
 
 
 def format_time(raw_time):
@@ -31,3 +33,17 @@ def parse_duration(duration_str):
         minutes = minutes % 60
 
     return f"{hours:02d}:{minutes:02d}:00"
+
+# fromhttps://stackoverflow.com/questions/6086976/how-to-get-a-complete-exception-stack-trace-in-python
+def format_exception(e):
+    exception_list = traceback.format_stack()
+    exception_list = exception_list[:-2]
+    exception_list.extend(traceback.format_tb(sys.exc_info()[2]))
+    exception_list.extend(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1]))
+
+    exception_str = "Traceback (most recent call last):\n"
+    exception_str += "".join(exception_list)
+    # Removing the last \n
+    exception_str = exception_str[:-1]
+
+    return exception_str

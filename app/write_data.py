@@ -42,15 +42,10 @@ def write_players(players_list):
         mydb.rollback()
 
 def write_games(games_list):
-    sql = """INSERT INTO games (id, date, home_team, visiting_team, season, venue, attendance, start_time, end_time, duration, home_goals, visiting_goals, win_type)
+    sql = """INSERT INTO games (id, date, home_team_id, visiting_team_id, season, venue, attendance, start_time, end_time, duration, home_goals, visiting_goals, win_type)
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     AS new_data
     ON DUPLICATE KEY UPDATE
-        date = new_data.date,
-        home_team = new_data.home_team,
-        visiting_team = new_data.visiting_team,
-        season = new_data.season,
-        venue = new_data.venue,
         attendance = new_data.attendance,
         start_time = new_data.start_time,
         end_time = new_data.end_time,
@@ -77,11 +72,14 @@ def write_games(games_list):
             game["visiting_goals"],
             game["win_type"]
         ))
+
+        print(game["home_team"], game["visiting_team"])
     try:
         cursor.executemany(sql, records)
         mydb.commit()
         print(f"{cursor.rowcount} records inserted into GAMES successfully.")
     except mysql.connector.Error as err:
+        print(game)
         print(f"Error: {err}")
         mydb.rollback()
 

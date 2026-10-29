@@ -58,14 +58,17 @@ def get_games():
             # date_str = game["row"]["date_with_day"]
 
             # formate the game status properly
-            game_status = game["row"]["game_status"].split()
+            win_type = game["row"]["game_status"].split()[-1]
 
-            # game statuses are "Final", "Final OT", "Final SO" etc so we want either "OT"/"SO" or "REG" if neither is there
-            game_status = game_status[-1] if len(game_status) > 1 else "REG"
+            # if win_type = "Final" turn it into "REG" for regulation
+            if win_type == "Final":
+                win_type = "REG"
+            
+            date_str = game["row"]["date_with_day"]
 
             games[game["row"]["game_id"]] = {
                 "game_id": game["row"]["game_id"],
-                # "date": utils.parse_date(date_str),
+                "date": utils.parse_date(date_str),
                 "home_team": game["prop"]["home_team_city"]["teamLink"],
                 "visiting_team": game["prop"]["visiting_team_city"]["teamLink"],
                 "season": config.SEASON,
@@ -76,18 +79,22 @@ def get_games():
                 "duration": None,
                 "home_goals": game["row"]["home_goal_count"],
                 "visiting_goals": game["row"]["visiting_goal_count"],
-                "game_status": game_status
+                "win_type": win_type
             }
     except TypeError as err:
         print(f"Error: {err}")
         print("This typically is a game not found error, which is expected if the game_id is not valid. This is normal behavior for the scraper.")
+    except Exception as err:
+        print(f"Error: {err}")
+        print("This is an unexpected error. Please check the URL and the data returned.")
+        print("URL: ", url)
+        print("Game list: ", game_list)
 
     # we're using another page now for the rest of the data
     for i in range(config.MIN_GAME, config.MAX_GAME + 1):
         # initialize a blank dict, i like this more than creating a large one at the end
         
         try:
-            game_data = {}
             url = f"https://lscluster.hockeytech.com/feed/index.php?feed=statviewfeed&view=gameSummary&game_id={i}&key=694cfeed58c932ee&site_id=2&client_code=pwhl&lang=en&league_id="        
             game = return_json(url)["details"]
 
@@ -116,10 +123,20 @@ def get_games():
 
             # sometimes the pwhl skips games or orders them weirdly, this should account for that
             except KeyError as err:
-                print(f"Error: Game {err} does not exist.")
+                print(f"Error: Game {err} does not exist. (KeyError)")
+            except Exception as err:
+                print(f"Error: {err}")
+                print("This is an unexpected error. Please check the URL and the data returned.")
+                print("URL: ", url)
+                print("Game data: ", game)
         # sometimes it'll try to get a game and mistake the error code for a game, this should account for that
         except TypeError as err:
-            print(f"Error: Game {err} does not exist.")
+            print(f"Error: Game {err} does not exist. (TypeError)")
+        except Exception as err:
+            print(f"Error: {err}")
+            print("This is an unexpected error. Please check the URL and the data returned.")
+            print("URL: ", url)
+            print("Game data: ", game)
     return games
 
 def get_game_events():
@@ -140,8 +157,12 @@ def get_game_events():
     }
 
     for i in range(config.MIN_GAME, config.MAX_GAME):
-        url = f"https://lscluster.hockeytech.com/feed/index.php?feed=statviewfeed&view=gameCenterPlayByPlay&game_id={i}&key=694cfeed58c932ee&client_code=pwhl&lang=en&league_id="
-        game = return_json(url)
+        try:
+            url = f"https://lscluster.hockeytech.com/feed/index.php?feed=statviewfeed&view=gameCenterPlayByPlay&game_id={i}&key=694cfeed58c932ee&client_code=pwhl&lang=en&league_id="
+            game = return_json(url)
+        except Exception as e:
+            print(f"Error occurred while fetching game {i}: {e}")
+            continue
 
         # init shootout_counter at 1 so when the first shot is taken, it will be 1 and not 0 - purely personal preference bc i know programming languages start at 0 so i could follow that standard
         # just makes it more readable if i ever get around to sharing my data
