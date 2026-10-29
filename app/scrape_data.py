@@ -2,9 +2,9 @@ import requests
 import json
 import datetime
 import math
-import config
-import utils
-import read_db as rd
+import app.config as config
+import app.utils as utils
+import app.read_db as rd
 
 def return_json(url):
     # since this is literally just json, no need for beautifulsoup. just requests.get and go

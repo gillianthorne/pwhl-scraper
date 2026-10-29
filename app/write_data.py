@@ -1,5 +1,4 @@
-from decouple import config
-import db
+import app.db as db
 import mysql.connector
 
 mydb = db.get_connection()
