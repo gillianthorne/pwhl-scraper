@@ -41,3 +41,8 @@ def game_events():
     except Exception as e:
         print("Couldn't write game events")
         print(e)
+
+if __name__ == "__main__":
+    players()
+    games()
+    game_events()
