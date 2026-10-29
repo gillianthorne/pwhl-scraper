@@ -1,6 +1,6 @@
 import mysql.connector
 
-import db
+import app.db as db
 
 def get_table_max(table_name):
     conn = db.get_connection()
