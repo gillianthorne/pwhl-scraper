@@ -18,4 +18,16 @@ def parse_game_time(time_str, am_pm):
     return time_str_proper
 
 def parse_date(date_str):
-    return datetime.datetime.strptime(date_str, "%a, %b %d")
+    return str(datetime.datetime.strptime(date_str, "%a, %b %d"))
+
+def parse_duration(duration_str):
+    hours_str, minutes_str = duration_str.split(":")
+    hours = int(hours_str)
+    minutes = int(minutes_str)
+
+    # normalize in case minutes ever overflow 60 (e.g. summed durations)
+    if minutes >= 60:
+        hours += minutes // 60
+        minutes = minutes % 60
+
+    return f"{hours:02d}:{minutes:02d}:00"
