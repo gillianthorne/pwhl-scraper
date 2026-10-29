@@ -30,3 +30,20 @@ def get_row_count(table_name):
         cursor.close()
         return -1
 
+def get_venues():
+    conn = db.get_connection()
+    cursor = db.get_cursor(conn)
+
+    try:
+        cursor.execute("SELECT venue_id, name FROM arenas")
+        result = cursor.fetchall()
+        cursor.close()
+        venues = {}
+        for venue in result:
+            venues[venue[1]] = venue[0]
+        return venues
+    except Exception as err:
+        print(f"Error: {err}")
+        print("this is the error")
+        cursor.close()
+        return -1
