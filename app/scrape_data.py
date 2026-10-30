@@ -202,19 +202,35 @@ def get_game_events():
 
             if event["event"] == "faceoff":
                 faceoff = event["details"]
+
+                # try-catching my x/y location 
+                try:
+                    x_location = faceoff["xLocation"]
+                    y_location = faceoff["yLocation"]
+                except KeyError:
+                    x_location = None
+                    y_location = None
                 events["faceoffs"].append({
                     "game_id": i,
                     "home_player_id": faceoff["homePlayer"]["id"],
                     "visiting_player_id": faceoff["visitingPlayer"]["id"],
                     "period": faceoff["period"]["id"],
                     "time": utils.format_time(faceoff["time"]),
-                    "x_location": faceoff["xLocation"],
-                    "y_location": faceoff["yLocation"],
+                    "x_location": x_location,
+                    "y_location": y_location,
                     "home_win": faceoff["homeWin"]
                 })
 
             if event["event"] == "shot":
                 shot = event["details"]
+
+                try:
+                    x_location = shot["xLocation"]
+                    y_location = shot["yLocation"]
+                except KeyError:
+                    x_location = None
+                    y_location = None
+
                 events["shots"].append({
                     "game_id": i,
                     "shooter_id": shot["shooter"]["id"],
@@ -222,8 +238,8 @@ def get_game_events():
                     "period": shot["period"]["id"],
                     "time": utils.format_time(shot["time"]),
                     "is_goal": shot["isGoal"],
-                    "x_location": shot["xLocation"],
-                    "y_location": shot["yLocation"],
+                    "x_location": x_location,
+                    "y_location": y_location,
                     "type": shot["shotType"],
                     "quality": shot["shotQuality"]
                 })
@@ -231,6 +247,14 @@ def get_game_events():
             if event["event"] == "goal":
                 goal = event["details"]
                 properties = goal["properties"]
+                # some games don't have x/y locations for goals, so this is a try/except to account for that so it doesn't crash mid-scrape
+                try:
+                    x_location = goal["xLocation"]
+                    y_location = goal["yLocation"]
+                except KeyError:
+                    x_location = None
+                    y_location = None
+
                 events["goals"].append({
                     "game_id": i,
                     "scorer_id": goal["scoredBy"]["id"],
@@ -243,8 +267,8 @@ def get_game_events():
                     "is_insurancegoal": properties["isInsuranceGoal"],
                     "is_gamewinninggoal": properties["isGameWinningGoal"],
                     "is_penaltyshot": properties["isPenaltyShot"],
-                    "x_location": goal["xLocation"],
-                    "y_location": goal["yLocation"]
+                    "x_location": x_location,
+                    "y_location": y_location
                 })
 
                 # this ties back to the powerplay thing - i wanted primary/secondary to be 1/2 for ease of reading, so therefore index+1
@@ -293,18 +317,34 @@ def get_game_events():
                 except TypeError:
                     on_player = 0
 
+                # sometimes x/y location is missing
+                try:
+                    x_location = hit["xLocation"]
+                    y_location = hit["yLocation"]
+                except KeyError:
+                    x_location = None
+                    y_location = None
+
                 events["hits"].append({
                     "game_id": i,
                     "player_id": hit["player"]["id"],
                     "period": hit["period"]["id"],
                     "time": utils.format_time(hit["time"]),
-                    "x_location": hit["xLocation"],
-                    "y_location": hit["yLocation"],
+                    "x_location": x_location,
+                    "y_location": y_location,
                     "on_player_id": on_player
                 })
 
             if event["event"] == "blocked_shot":
                 blocked_shot = event["details"]
+
+                try:
+                    x_location = blocked_shot["xLocation"]
+                    y_location = blocked_shot["yLocation"]
+                except KeyError:
+                    x_location = None
+                    y_location = None
+
                 events["blocked_shots"].append({
                     "game_id": i,
                     "shooter_id": blocked_shot["shooter"]["id"],
@@ -312,8 +352,8 @@ def get_game_events():
                     "goalie_id": blocked_shot["goalie"]["id"],
                     "period": blocked_shot["period"]["id"],
                     "time": utils.format_time(blocked_shot["time"]),
-                    "x_location": blocked_shot["xLocation"],
-                    "y_location": blocked_shot["yLocation"],
+                    "x_location": x_location,
+                    "y_location": y_location,
                     "type": blocked_shot["shotType"],
                     "quality": blocked_shot["shotQuality"]
                 })
