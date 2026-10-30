@@ -23,7 +23,6 @@ def players():
 def games():
     try:
         games_list = get_games()
-        print(games_list.values())
         wd.write_games(games_list.values())
     except Exception as e:
         print("Couldn't write games")

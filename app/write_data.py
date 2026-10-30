@@ -178,7 +178,7 @@ def write_shots(shot_list):
         mydb.rollback()
 
 def write_goals(goal_list):
-    sql = """INSERT INTO goals (id, scorer_id, game_id, period, time, is_powerplay, is_shorthanded, is_emptynet, is_insurancegoal, is_gamewinninggoal, x_location, y_location, is_penalty_shot) 
+    sql = """INSERT INTO goals (id, scorer_id, game_id, period, time, is_powerplay, is_shorthanded, is_emptynet, is_insurancegoal, is_gamewinninggoal, x_location, y_location, is_penaltyshot) 
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         AS new_data
         ON DUPLICATE KEY UPDATE
@@ -205,6 +205,7 @@ def write_goals(goal_list):
             goal["time"],
             goal["is_powerplay"],
             goal["is_shorthanded"],
+            goal["is_emptynet"],
             goal["is_insurancegoal"],
             goal["is_gamewinninggoal"],
             goal["x_location"],
@@ -245,7 +246,7 @@ def write_assists(assists_list):
         mydb.rollback()   
 
 def write_plusminus(plusminus_list):
-    sql = "INSERT IGNORE INTO plus_minus (goal_id, player_id, is_plus)"
+    sql = "INSERT IGNORE INTO plus_minus (goal_id, player_id, is_plus) VALUES (%s, %s, %s)"
 
     records = []
     for plusminus in plusminus_list:

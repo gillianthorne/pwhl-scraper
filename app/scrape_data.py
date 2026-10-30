@@ -168,6 +168,11 @@ def get_game_events():
         # just makes it more readable if i ever get around to sharing my data
         shootout_counter = 1
 
+        # check if "game" is type str for "error: no such game" return
+        if isinstance(game, str):
+            print(f"Game {i} does not exist. Skipping.")
+            continue
+
         for event in game:
             # general structure for this is:
                 # 1. figure out what the event type is
@@ -200,7 +205,7 @@ def get_game_events():
                 events["faceoffs"].append({
                     "game_id": i,
                     "home_player_id": faceoff["homePlayer"]["id"],
-                    "visiting_player_id": faceoff["visitingPlayerId"]["id"],
+                    "visiting_player_id": faceoff["visitingPlayer"]["id"],
                     "period": faceoff["period"]["id"],
                     "time": utils.format_time(faceoff["time"]),
                     "x_location": faceoff["xLocation"],
@@ -228,12 +233,13 @@ def get_game_events():
                 properties = goal["properties"]
                 events["goals"].append({
                     "game_id": i,
-                    "scorer_id": goal["scorer"]["id"],
+                    "scorer_id": goal["scoredBy"]["id"],
                     "goal_id": goal["game_goal_id"],
                     "period": goal["period"]["id"],
                     "time": utils.format_time(goal["time"]),
-                    "is_powerplay": properties["isPowerplay"],
-                    "is_shorthanded": properties["isEmptyNet"],
+                    "is_powerplay": properties["isPowerPlay"],
+                    "is_emptynet": properties["isEmptyNet"],
+                    "is_shorthanded": properties["isShortHanded"],
                     "is_insurancegoal": properties["isInsuranceGoal"],
                     "is_gamewinninggoal": properties["isGameWinningGoal"],
                     "is_penaltyshot": properties["isPenaltyShot"],
@@ -308,7 +314,7 @@ def get_game_events():
                     "time": utils.format_time(blocked_shot["time"]),
                     "x_location": blocked_shot["xLocation"],
                     "y_location": blocked_shot["yLocation"],
-                    "type": blocked_shot["type"],
+                    "type": blocked_shot["shotType"],
                     "quality": blocked_shot["shotQuality"]
                 })
 
@@ -336,3 +342,5 @@ def get_game_events():
                     "time": utils.format_time(penalty_shot["time"]),
                     "is_goal": penalty_shot["isGoal"]
                 })
+
+    return events
