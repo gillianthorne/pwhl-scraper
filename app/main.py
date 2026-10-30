@@ -12,6 +12,7 @@ def players():
     try:
         player_list = get_players()
         wd.write_players(player_list)
+        wd.write_current_players(player_list)
     except Exception as e:
         print("Couldn't write players")
         print(e)

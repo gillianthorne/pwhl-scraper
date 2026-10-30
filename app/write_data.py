@@ -1,3 +1,4 @@
+from app import config
 import app.db as db
 import mysql.connector
 
@@ -40,6 +41,29 @@ def write_players(players_list):
     except mysql.connector.Error as err:
         print(f"Error: {err}")
         mydb.rollback()
+
+def write_current_players(players_list):
+    sql = f"INSERT IGNORE INTO current_players (id, start_date, end_date, team_id, jersey_number, position)"
+
+    records = []
+    for player in players_list:
+        records.append((
+            player["player_id"],
+            config.SEASON_START,
+            config.SEASON_END,
+            player["team_id"],
+            player["jersey_number"],
+            player["position"]
+        ))
+
+    try:
+        cursor.executemany(sql, records)
+        mydb.commit()
+        print(f"{cursor.rowcount} records inserted into CURRENT_PLAYERS successfully.")
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        mydb.rollback()
+
 
 def write_games(games_list):
     sql = """INSERT INTO games (id, date, home_team_id, visiting_team_id, season, venue, attendance, start_time, end_time, duration, home_goals, visiting_goals, win_type)

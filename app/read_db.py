@@ -47,3 +47,21 @@ def get_venues():
         print("this is the error")
         cursor.close()
         return -1
+
+def get_teams():
+    conn = db.get_connection()
+    cursor = db.get_cursor(conn)
+
+    try:
+        cursor.execute("SELECT team_id, name FROM teams")
+        result = cursor.fetchall()
+        cursor.close()
+        teams = {}
+        for team in result:
+            teams[team[1]] = team[0]
+        return teams
+    except Exception as err:
+        print(f"Error: {err}")
+        print("this is the error")
+        cursor.close()
+        return -1

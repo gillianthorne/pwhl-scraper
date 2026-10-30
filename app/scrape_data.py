@@ -25,6 +25,8 @@ def get_players():
     # set up empty lists for us to put our data in temporarily
     players = []
 
+    teams = rd.get_teams()
+
     # we're counting through each team, with +1 because python goes up to but not including the second number
     for i in range(1, config.MAX_TEAM_ID + 1):
         # this is the ugly ugly url that we're getting data from
@@ -32,11 +34,35 @@ def get_players():
         
         roster = return_json(url)
 
+        team = roster["teamName"]
+
+        team_id = teams[team]
+
         # the path to the actual data is janky, but this is it
         for section in roster["roster"][0]["sections"]:
             # if the section we're looking at is actually a hockey player (IDK why it would be)
             if section["title"] in ["Forwards", "Defenders", "Goalies"]:
-                players += [player["row"] for player in section["data"]]
+                for player in section["data"]:
+
+                    if player["row"]["position"] in ["RW", "LW", "C"]:
+                        position = "F"
+                    elif player["row"]["position"] in ["RD", "LD"]:
+                        position = "D"
+                    else:
+                        position = "G"
+
+
+                    players.append({
+                        "player_id": player["row"]["player_id"],
+                        "jersey_number": player["row"]["tp_jersey_number"],
+                        "name": player["row"]["name"],
+                        "position": position,
+                        "shoots": player["row"]["shoots"],
+                        "catches": player["row"]["catches"],
+                        "birthdate": player["row"]["birthdate"],
+                        "hometown": player["row"]["hometown"],
+                        "team_id": team_id
+                    })
 
     return players
 
