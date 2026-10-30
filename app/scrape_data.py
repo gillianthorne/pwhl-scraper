@@ -26,6 +26,7 @@ def get_players():
     players = []
 
     teams = rd.get_teams()
+    print(teams)
 
     # we're counting through each team, with +1 because python goes up to but not including the second number
     for i in range(1, config.MAX_TEAM_ID + 1):
@@ -36,6 +37,15 @@ def get_players():
 
         team = roster["teamName"]
 
+        # replace the accent in montreal so it matches the team name in the database
+        if team == "Montréal Victoire":
+            team = "Montreal Victoire"
+
+        print(team)
+
+        if team not in teams:
+            print(f"Team {team} not found in database. This is likely due to expansion teams skipping numbers. Skipping.")
+            continue
         team_id = teams[team]
 
         # the path to the actual data is janky, but this is it
@@ -44,25 +54,45 @@ def get_players():
             if section["title"] in ["Forwards", "Defenders", "Goalies"]:
                 for player in section["data"]:
 
-                    if player["row"]["position"] in ["RW", "LW", "C"]:
-                        position = "F"
-                    elif player["row"]["position"] in ["RD", "LD"]:
-                        position = "D"
+                    if player["row"]["position"] in ["RW", "LW", "C", "F"]:
+                        players.append({
+                            "player_id": player["row"]["player_id"],
+                            "jersey_number": player["row"]["tp_jersey_number"],
+                            "name": player["row"]["name"],
+                            "position": "F",
+                            "shoots": player["row"]["shoots"],
+                            "catches": None,
+                            "birthdate": player["row"]["birthdate"],
+                            "hometown": player["row"]["hometown"],
+                            "team_id": team_id
+                        })
+                    elif player["row"]["position"] in ["RD", "LD", "D"]:
+                        players.append({
+                            "player_id": player["row"]["player_id"],
+                            "jersey_number": player["row"]["tp_jersey_number"],
+                            "name": player["row"]["name"],
+                            "position": "D",
+                            "shoots": player["row"]["shoots"],
+                            "catches": None,
+                            "birthdate": player["row"]["birthdate"],
+                            "hometown": player["row"]["hometown"],
+                            "team_id": team_id
+                        })
+                    elif player["row"]["position"] == "G":
+                        players.append({
+                            "player_id": player["row"]["player_id"],
+                            "jersey_number": player["row"]["tp_jersey_number"],
+                            "name": player["row"]["name"],
+                            "position": "D",
+                            "shoots": None,
+                            "catches": player["row"]["catches"],
+                            "birthdate": player["row"]["birthdate"],
+                            "hometown": player["row"]["hometown"],
+                            "team_id": team_id
+                        })
                     else:
-                        position = "G"
-
-
-                    players.append({
-                        "player_id": player["row"]["player_id"],
-                        "jersey_number": player["row"]["tp_jersey_number"],
-                        "name": player["row"]["name"],
-                        "position": position,
-                        "shoots": player["row"]["shoots"],
-                        "catches": player["row"]["catches"],
-                        "birthdate": player["row"]["birthdate"],
-                        "hometown": player["row"]["hometown"],
-                        "team_id": team_id
-                    })
+                        print(f"Unknown position for player {player['row']['name']}: {player['row']['position']}")
+    # return the list of players
 
     return players
 

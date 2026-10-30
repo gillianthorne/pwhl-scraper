@@ -53,7 +53,7 @@ def get_teams():
     cursor = db.get_cursor(conn)
 
     try:
-        cursor.execute("SELECT team_id, name FROM teams")
+        cursor.execute("SELECT id, name FROM teams")
         result = cursor.fetchall()
         cursor.close()
         teams = {}

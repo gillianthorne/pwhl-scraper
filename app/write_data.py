@@ -18,7 +18,7 @@ def write_players(players_list):
             records.append((
                 player["player_id"], 
                 player["name"], 
-                "", 
+                None, 
                 player["catches"],
                 player["birthdate"], 
                 player["hometown"]
@@ -28,7 +28,7 @@ def write_players(players_list):
                 player["player_id"],
                 player["name"],
                 player["shoots"],
-                "",
+                None,
                 player["birthdate"],
                 player["hometown"]
             ))
@@ -43,7 +43,7 @@ def write_players(players_list):
         mydb.rollback()
 
 def write_current_players(players_list):
-    sql = f"INSERT IGNORE INTO current_players (id, start_date, end_date, team_id, jersey_number, position)"
+    sql = "INSERT IGNORE INTO current_players (id, start_date, end_date, team_id, jersey_number, position) VALUES (%s, %s, %s, %s, %s, %s)"
 
     records = []
     for player in players_list:
