@@ -369,7 +369,7 @@ def write_blocked_shots(blocked_shot_list):
 
 def write_shootouts(shootout_list):
     sql = """INSERT INTO shootouts (shooter_id, goalie_id, game_id, is_goal, is_gamewinninggoal, shootout_attempt)
-    VALUES (%s, %s, %s, %s, %s, %s, %s)
+    VALUES (%s, %s, %s, %s, %s, %s)
     AS new_data
     ON DUPLICATE KEY UPDATE
         goalie_id = new_data.goalie_id,
