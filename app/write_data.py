@@ -73,7 +73,6 @@ def write_games(games_list):
             game["win_type"]
         ))
 
-        print(game["home_team"], game["visiting_team"])
     try:
         cursor.executemany(sql, records)
         mydb.commit()
